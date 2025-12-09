@@ -1,10 +1,16 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 // Simple Todo component (single-file) using Tailwind CSS
 // Usage: place this file in src/components/TodoApp.jsx and import <TodoApp /> into your app.
 
+interface Todo {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
 export default function TodoApp() {
-  const [todos, setTodos] = useState(() => {
+  const [todos, setTodos] = useState<Todo[]>(() => {
     try {
       const raw = localStorage.getItem("todos-v1");
       return raw ? JSON.parse(raw) : [];
@@ -13,15 +19,15 @@ export default function TodoApp() {
     }
   });
   const [text, setText] = useState("");
-  const [filter, setFilter] = useState("all");
-  const [editingId, setEditingId] = useState(null);
+  const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState("");
 
   useEffect(() => {
     localStorage.setItem("todos-v1", JSON.stringify(todos));
   }, [todos]);
 
-  function addTodo(e) {
+  function addTodo(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const trimmed = text.trim();
     if (!trimmed) return;
@@ -30,28 +36,28 @@ export default function TodoApp() {
       text: trimmed,
       completed: false,
     };
-    setTodos((t) => [newTodo, ...t]);
+    setTodos((t: Todo[]) => [newTodo, ...t]);
     setText("");
   }
 
-  function toggle(id) {
-    setTodos((t) => t.map((x) => (x.id === id ? { ...x, completed: !x.completed } : x)));
+  function toggle(id: string) {
+    setTodos((t: Todo[]) => t.map((x: Todo) => (x.id === id ? { ...x, completed: !x.completed } : x)));
   }
 
-  function remove(id) {
-    setTodos((t) => t.filter((x) => x.id !== id));
+  function remove(id: string) {
+    setTodos((t: Todo[]) => t.filter((x: Todo) => x.id !== id));
   }
 
-  function startEdit(todo) {
+  function startEdit(todo: Todo) {
     setEditingId(todo.id);
     setEditingText(todo.text);
   }
 
-  function saveEdit(e) {
+  function saveEdit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const trimmed = editingText.trim();
     if (!trimmed) return;
-    setTodos((t) => t.map((x) => (x.id === editingId ? { ...x, text: trimmed } : x)));
+    setTodos((t: Todo[]) => t.map((x: Todo) => (x.id === editingId ? { ...x, text: trimmed } : x)));
     setEditingId(null);
     setEditingText("");
   }
@@ -62,10 +68,10 @@ export default function TodoApp() {
   }
 
   function clearCompleted() {
-    setTodos((t) => t.filter((x) => !x.completed));
+    setTodos((t: Todo[]) => t.filter((x: Todo) => !x.completed));
   }
 
-  const visible = todos.filter((t) => {
+  const visible = todos.filter((t: Todo) => {
     if (filter === "all") return true;
     if (filter === "active") return !t.completed;
     return t.completed;
@@ -121,7 +127,7 @@ export default function TodoApp() {
           <li className="text-sm text-gray-500 italic">No todos — add something!</li>
         )}
 
-        {visible.map((todo) => (
+        {visible.map((todo: Todo) => (
           <li
             key={todo.id}
             className="flex items-center gap-3 bg-gray-50 rounded-lg p-3 border border-gray-100"
@@ -180,7 +186,7 @@ export default function TodoApp() {
           Clear completed
         </button>
 
-        <div className="text-sm text-gray-600">{todos.filter((t) => !t.completed).length} left</div>
+        <div className="text-sm text-gray-600">{todos.filter((t: Todo) => !t.completed).length} left</div>
       </div>
     </div>
   );
